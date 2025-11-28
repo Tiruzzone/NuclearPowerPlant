@@ -17,7 +17,7 @@ try {
 function init() {
     scene = new THREE.Scene();
     const bgColor = 0x111118; // Sfondo molto scuro
-    scene.background = new THREE.Color(bgColor); 
+    scene.background = new THREE.Color(bgColor);
     scene.fog = new THREE.Fog(bgColor, 50, 200);
 
     camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -27,9 +27,9 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.NoToneMapping; 
+    renderer.toneMapping = THREE.NoToneMapping;
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
     // Bloom
@@ -39,14 +39,14 @@ function init() {
     composer.addPass(bloomPass);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; 
-    controls.dampingFactor = 0.05; 
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2 - 0.02;
 
     // LUCI (Basse per evitare il bianco)
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3)); 
-    
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); 
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
     dirLight.position.set(20, 50, 30); dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048; dirLight.shadow.mapSize.height = 2048;
     scene.add(dirLight);
@@ -61,16 +61,18 @@ function init() {
     document.getElementById('btn-micro').onclick = () => switchView('micro');
     document.getElementById('btn-fire').onclick = () => triggerFission();
     document.getElementById('btn-xray').onclick = () => toggleXRayMode();
-    
+    document.getElementById('btn-back-macro').onclick = () => switchView('macro');
+
     window.addEventListener('resize', onWindowResize);
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('click', onMouseClick);
     switchView('macro');
 }
 
 function toggleXRayMode() {
     xRayEnabled = !xRayEnabled;
     const btn = document.getElementById('btn-xray');
-    
+
     if (xRayEnabled) {
         btn.style.background = "#4ecca3";
         btn.style.color = "#000";
@@ -97,23 +99,38 @@ function toggleXRayMode() {
 function switchView(view) {
     const btnMacro = document.getElementById('btn-macro');
     const btnMicro = document.getElementById('btn-micro');
+    const btnXray = document.getElementById('btn-xray');
+    const btnBack = document.getElementById('btn-back-macro');
+
     if(view === 'macro') {
         toggleMacro(true); toggleMicro(false);
         camera.position.set(40, 30, 40); controls.target.set(0,0,0);
         scene.background.setHex(0x111118); scene.fog = new THREE.Fog(0x111118, 50, 200);
+
         document.getElementById('fission-controls').style.display = 'none';
         document.getElementById('scene-title').innerText = "PWR Plant Model";
-        document.getElementById('btn-xray').style.display = 'block'; 
+
+        btnMacro.style.display = 'flex';
+        btnMicro.style.display = 'flex';
+        btnXray.style.display = 'flex';
+        btnBack.style.display = 'none';
+
         btnMacro.classList.add('active'); btnMicro.classList.remove('active');
     } else {
         toggleMacro(false); toggleMicro(true);
         camera.position.set(0, 0, 30); controls.target.set(0,0,0);
         scene.background.setHex(0x000000); scene.fog = null;
+
         document.getElementById('fission-controls').style.display = 'block';
         document.getElementById('scene-title').innerText = "Fissione Nucleare U-235";
-        document.getElementById('btn-xray').style.display = 'none'; 
+
+        btnMacro.style.display = 'none';
+        btnMicro.style.display = 'none';
+        btnXray.style.display = 'none';
+        btnBack.style.display = 'flex';
+
         btnMicro.classList.add('active'); btnMicro.classList.remove('active');
-        if(xRayEnabled) toggleXRayMode(); 
+        if(xRayEnabled) toggleXRayMode();
     }
 }
 
@@ -126,22 +143,42 @@ function animate() {
 }
 
 function onMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1; 
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    if (getMacroObjects().length > 0 && !xRayEnabled) { 
+    if (getMacroObjects().length > 0 && !xRayEnabled) {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
         const tooltip = document.getElementById('tooltip');
         let target = null;
-        for(let i=0; i<intersects.length; i++) { 
-            let obj = intersects[i].object; 
-            while(obj) { if(obj.userData && obj.userData.name) { target = obj; break; } obj = obj.parent; } 
-            if(target) break; 
+        for(let i=0; i<intersects.length; i++) {
+            let obj = intersects[i].object;
+            while(obj) { if(obj.userData && obj.userData.name) { target = obj; break; } obj = obj.parent; }
+            if(target) break;
         }
         if (target) {
             tooltip.style.display = 'block'; tooltip.style.left = event.clientX + 15 + 'px'; tooltip.style.top = event.clientY + 15 + 'px';
             tooltip.innerHTML = '<strong>' + target.userData.name + '</strong>' + target.userData.info; document.body.style.cursor = 'pointer';
         } else { tooltip.style.display = 'none'; document.body.style.cursor = 'default'; }
+    }
+}
+
+function onMouseClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    if (getMacroObjects().length > 0 && !xRayEnabled) {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+        let target = null;
+        for(let i=0; i<intersects.length; i++) {
+            let obj = intersects[i].object;
+            while(obj) { if(obj.userData && obj.userData.name) { target = obj; break; } obj = obj.parent; }
+            if(target) break;
+        }
+
+        if (target && target.userData.name === "Pressure Vessel") {
+            switchView('micro');
+        }
     }
 }
 
