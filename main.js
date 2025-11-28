@@ -163,6 +163,9 @@ function onMouseMove(event) {
 }
 
 function onMouseClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
     if (getMacroObjects().length > 0 && !xRayEnabled) {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(scene.children, true);
