@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulazione PWR Nucleare - X-RAY MODE</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+    <script src="main.js" type="module"></script>
+</head>
+<body>
+    <div id="error-msg">Errore di caricamento. Usa Live Server.</div>
+    <div id="ui-container">
+        <h1 id="scene-title">PWR Plant Model</h1>
+        <p id="scene-desc">Simulazione modulare e ottimizzata.</p>
+        
+        <button class="nav-btn active" id="btn-macro"><span>1. Impianto (Macro)</span> <span>&#127970;</span></button>
+        <button class="nav-btn" id="btn-micro"><span>2. Nocciolo (Micro)</span> <span>&#9883;</span></button>
+        
+        <button class="nav-btn" id="btn-xray" style="background: linear-gradient(45deg, #444444, #777777); border: 1px solid #aaa; margin-top: 15px;">
+            <span>👁️ X-RAY: Ispezione</span>
+        </button>
+
+        <div id="fission-controls" style="display:none; margin-top:15px; border-top:1px solid #444; padding-top:15px;">
+            <p style="margin-bottom:5px">Stato Reazione: <span id="atom-status" style="font-weight:bold; color:#4ecca3">Stabile</span></p>
+            <button class="nav-btn" id="btn-fire" style="background: #e74c3c; border:none;">INNESCA FISSIONE</button>
+        </div>
+    </div>
+    <div id="tooltip"></div>
+    <div id="instructions">Ruota: Click sx + Trascina | Pan: Click dx | Zoom: Rotella</div>
+</body>
+</html>
